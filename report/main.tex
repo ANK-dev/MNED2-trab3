@@ -1,0 +1,45 @@
+\documentclass[10pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{caption}
+\usepackage{csquotes}
+\usepackage{fancyvrb}
+\usepackage{float}
+
+\usepackage{tocloft}
+\renewcommand \cftchapdotsep{4.5}
+
+\usepackage{titlesec}
+\titleformat{\chapter}{\huge\bf}{\thechapter.}{20pt}{\huge\bf}
+
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+\usepackage{indentfirst}
+
+\author{Ariel Nogueira Kovaljski}
+\title{Trabalho 1 de Métodos Numéricos para Equações Diferenciais II}
+
+\begin{document}
+    \input{titlepage.tex}
+
+    \tableofcontents
+    \newpage
+    \listoffigures
+
+    \include{chapters/abstract}
+    \include{chapters/introduction}
+    \include{chapters/methodology}
+    \include{chapters/results}
+    \include{chapters/discussion}
+    \include{chapters/conclusion}
+    \include{chapters/bibliography}
+    \include{chapters/code}
+
+\end{document}

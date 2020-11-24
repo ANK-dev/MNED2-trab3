@@ -1,0 +1,366 @@
+\chapter{Metodologia}
+Neste capítulo serão abordados os passos e métodos utilizados para se
+obter a solução numérica do problema proposto.
+
+\section{Condições Inicial e de Contorno}
+A resolução de qualquer equação diferencial parcial (EDP) requer a
+determinação de sua condição(ões) inicial(ais) e de contorno. Como
+proposto pelo trabalho, a concentração inicial da malha é dada pela
+seguinte equação
+\begin{equation}
+    c(x,0) = e^{-A(x - B)} + s(x)
+\end{equation}
+e as condições de contorno são dadas pelas seguintes equações
+
+% Equações lado-a-lado
+\medskip
+\noindent
+\begin{minipage}{.5\linewidth}
+    \begin{equation}
+        \left( \frac{\partial c}{\partial x} \right)_{x=0}^t = 0
+    \end{equation}
+\end{minipage}%
+\begin{minipage}{.5\linewidth}
+    \begin{equation}
+        \left( \frac{\partial c}{\partial x} \right)_{x=L_x}^t = 0
+    \end{equation}
+\end{minipage}
+
+\medskip
+\noindent para o contorno esquerdo e direito, respectivamente.
+
+Usando o conceitos de volumes fantasmas, é possível determinar o valor dos
+volumes no contorno, através das seguintes aproximações, para o contorno
+esquerdo,
+
+\[
+    \left(\frac{\partial c}{\partial c}\right)_{x=0}^t
+    \approx
+    \frac{Q_1^n - Q_0^n}{\Delta x} = 0
+\]
+\begin{equation}
+    \therefore\ Q_1^n = Q_0^n
+\end{equation}
+e para o contorno direito,
+\[
+    \left(\frac{\partial c}{\partial c}\right)_{x=L_x}^t
+    \approx
+    \frac{Q_{nx+1}^n - Q_{nx}^n}{\Delta x} = 0
+\]
+\begin{equation}
+    \therefore\ Q_{nx+1}^n = Q_{nx}^n
+\end{equation}
+
+\section{Métodos Numéricos}
+Os métodos numéricos utilizados para a resolução da equação de advecção são
+diversos. Nesta seção serão tratados os quatro métodos utilizados neste
+trabalho.
+
+\subsection{Métodos \textit{Upwind}}
+Problemas hiperbólicos, como a equação da advecção, possuem informação (ondas)
+que se propagam com uma velocidade e sentido característico. A utilização de
+métodos \textit{upwind} leva em conta essa característica, permitindo uma
+modelagem mais acurada do fenômeno tratado. O método \textit{upwind} escolhido
+para a resolução da equação da advecção é o \textit{forward time-backward space}
+(FTBS).
+
+\subsubsection{Forward Time-Backward Space (FTBS)}
+O FTBS trata da ideia de que, para a equação da advecção unidimensional, há
+apenas uma única onda que se propaga. O método \textit{upwind} determina o
+valor de $Q_i^{n+1}$, onde, para um $\bar{u} > 0$, resulta em um fluxo da
+esquerda para a direita, de forma que a concentração de cada volume $Q_i^{n+1}$
+depende dos volumes atual $Q_i^n$ e anterior $Q_{i-1}^n$. Sua discretização é:
+\begin{equation}\label{FTBS}
+    Q_i^{n+1} = Q_i^n - \frac{\bar{u}\Delta t}{\Delta x} \left(
+        Q_i^n - Q_{i-1}^n
+    \right)
+\end{equation}
+aplicando as condições de contorno, obtém-se,
+\[
+    Q_i^{n+1} = Q_i^n - \frac{\bar{u}\Delta t}{\Delta x} \left(
+        Q_1^n - Q_1^n
+    \right)
+\]
+\begin{equation}
+    \therefore\ Q_1^{n+1} = Q_1^n
+\end{equation}
+para o primeiro elemento da malha (contorno esquerdo). O último elemento da
+malha (contorno direito) no método FTBS não necessita do volume fantasma, pois
+depende apenas do elemento atual $Q_i^n$ e do anterior $Q_{i-1}^n$, portanto, a
+Eq.\ \ref{FTBS} aplica-se ao contorno direito.
+
+\subsection{Lax-Friedrichs (L-F)}
+Para Lax-Friedrichs (L-F), tem-se a seguinte discretização
+\begin{equation}\label{L-F}
+    Q_i^{n+1} = \frac{Q_{i+1}^n + Q_{i-1}^n}{2}
+    - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+    Q_{i+1}^n - Q_{i-1}^n
+    \right)
+\end{equation}
+aplicando as condições de contorno, obtém-se,
+\begin{equation}
+    Q_1^{n+1} = \frac{Q_2^n + Q_1^n}{2}
+    - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+    Q_2^n - Q_1^n
+    \right)
+\end{equation}
+para o primeiro elemento da malha (contorno esquerdo). Enquanto para o último
+elemento da malha (contorno direito), obtém-se,
+\begin{equation}
+    Q_{nx}^{n+1} = \frac{Q_{nx}^n + Q_{nx-1}^n}{2}
+    - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+    Q_{nx}^n - Q_{nx-1}^n
+    \right)
+\end{equation}
+
+\subsection{Métodos de Alta Resolução}
+A utilização de métodos \textit{upwind} de primeira ordem, apesar de simples,
+acaba por introduzir significativa difusão numérica, impactando negativamente a
+acurácia da solução. Os métodos de alta resolução introduzem um termo
+corretivo, de maneira a minimizar a influência da difusão numérica sobre o
+resultado final. Os métodos de alta resolução escolhidos para a resolução da
+equação da advecção são o Lax-Wendroff (L-W) e Beam-Warming (B-W).
+
+\subsubsection{Lax-Wendroff (L-W)}
+Para Lax-Wendroff (L-W), tem-se a seguinte discretização
+\begin{equation}\label{L-W}
+    Q_i^{n+1} = Q_i^n - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+        Q_{i+1}^n - Q_{i-1}^n
+    \right) + \frac{\bar{u}^2{\Delta t}^2}{2{\Delta x}^2}\left(
+        Q_{i+1}^n - 2Q_i^n + Q_{i-1}^n
+    \right)
+\end{equation}
+aplicando as condições de contorno, obtém-se,
+\[
+    Q_1^{n+1} = Q_1^n - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+        Q_2^n - Q_1^n
+    \right) + \frac{\bar{u}^2{\Delta t}^2}{2{\Delta x}^2}\left(
+        Q_2^n - 2Q_1^n + Q_1^n
+    \right)
+\]
+\begin{equation}\label{L-W esq}
+    Q_1^{n+1} = Q_1^n - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+        Q_2^n - Q_1^n
+    \right) + \frac{\bar{u}^2{\Delta t}^2}{2{\Delta x}^2}\left(
+        Q_2^n - Q_1^n
+    \right)
+\end{equation}
+para o primeiro elemento da malha (contorno esquerdo). Enquanto para o último
+elemento da malha (contorno direito), obtém-se,
+\[
+    Q_{nx}^{n+1} = Q_{nx}^n - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+        Q_{nx}^n - Q_{nx-1}^n
+    \right) + \frac{\bar{u}^2{\Delta t}^2}{2{\Delta x}^2}\left(
+        Q_{nx}^n - 2Q_{nx}^n + Q_{nx-1}^n
+    \right)
+\]
+\begin{equation}
+    Q_{nx}^{n+1} = Q_{nx}^n - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+        Q_{nx}^n - Q_{nx-1}^n
+    \right) + \frac{\bar{u}^2{\Delta t}^2}{2{\Delta x}^2}\left(
+        Q_{nx-1}^n - Q_{nx}^n
+    \right)
+\end{equation}
+
+\subsubsection{Beam-Warming (B-W)}
+Para Beam-Warming (B-W), tem-se a seguinte discretização
+\begin{equation}\label{B-W}
+    % Redimensionamento para largura da página `\resizebox'
+    \resizebox{0.8\textwidth}{!}
+    {$
+    Q_i^{n+1} = Q_i^n - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+        3Q_i^n - 4Q_{i-1}^n + Q_{i-2}^n
+    \right) + \frac{\bar{u}^2{\Delta t}^2}{2{\Delta x}^2}\left(
+        Q_i^n - 2Q_{i-1}^n + Q_{i-2}^n
+    \right)
+    $}
+\end{equation}
+onde, para o primeiro elemento (contorno esquerdo), devido ao termo
+$Q_{i-2}^n$, não é possível aplicar as condições de contorno diretamente. Sendo
+assim, apenas para o primeiro elemento da malha, será utilizado o método L-W.
+Desta forma, para $i=1$ a discretização utilizada é a Eq.\ \ref{L-W esq}. Para
+o segundo elemento, aplica-se a condição de contorno esquerda, resultando na
+seguinte discretização,
+\[
+    % Redimensionamento para largura da página `\resizebox'
+    \resizebox{0.8\textwidth}{!}
+    {$
+    Q_2^{n+1} = Q_2^n - \frac{\bar{u}\Delta t}{2\Delta x}\left(
+        3Q_2^n - 4Q_1^n + Q_1^n
+    \right) + \frac{\bar{u}^2{\Delta t}^2}{2{\Delta x}^2}\left(
+        Q_2^n - 2Q_1^n + Q_1^n
+    \right)
+    $}
+\]
+\begin{equation}
+    % Redimensionamento para largura da página `\resizebox'
+    \resizebox{0.8\textwidth}{!}
+    {$
+    Q_2^{n+1} = Q_2^n - \frac{3\bar{u}\Delta t}{2\Delta x}\left(
+        Q_2^n - Q_1^n
+    \right) + \frac{\bar{u}^2{\Delta t}^2}{2{\Delta x}^2}\left(
+        Q_2^n - Q_1^n
+    \right)
+    $}
+\end{equation}
+Assim como no método FTBS, o último elemento da malha (contorno direito) do
+método B-W não necessita do volume fantasma, pois depende apenas do elemento
+atual $Q_i^n$ e dos anteriores $Q_{i-1}^n$ e $Q_{i-2}^n$, portanto, a Eq.\
+\ref{B-W} aplica-se ao contorno direito.
+
+\section{Estabilidade}
+Se trata do comportamento do algoritmo e seus valores numéricos frente aos
+parâmetros de entrada. Um algoritmo estável se comporta de maneira esperada
+frente a uma faixa específica de valores de entrada.
+
+A partir da condição de estabilidade para a equação da advecção-difusão,
+utilizada no primeiro trabalho,
+\begin{equation}
+    \Delta t
+    \leq
+    C\left(
+        \frac{1}{\frac{2\alpha}{{\Delta x}^2} + \frac{\bar{u}}{\Delta x}}
+    \right)
+\end{equation}
+considerando que não há componente difusivo $\alpha$ na equação de advecção, o
+mesmo pode ser igualado a 0.
+\[
+    \Delta t
+    \leq
+    C\left(
+        \frac{1}{\frac{2(0)}{{\Delta x}^2} + \frac{\bar{u}}{\Delta x}}
+    \right)
+\]
+\[
+    \Delta t \leq C\left( \frac{1}{\frac{\bar{u}}{\Delta x}} \right)
+\]
+\begin{equation}
+    \therefore\ \Delta t \leq C\frac{\Delta x}{\bar{u}}
+\end{equation}
+obtém-se assim a condição de estabilidade para os métodos numéricos para a
+equação da advecção, onde $C$ trata-se do número de Courant: adota-se um valor
+de 0,9 para estre trabalho, visando satisfazer a condição de estabilidade e
+evitar possíveis erros numéricos durante o cálculo computacional. O método
+obtido trata-se de um método \emph{condicionalmente estável}, ou seja que
+depende de uma faixa de valores para garantir a estabilidade de seu
+funcionamento.
+
+\section{Programação}
+Aliado destes conceitos, foi possível construir um programa em linguagem C que
+calcula as concentrações para cada célula ao longo do tempo, para cada método
+aqui citado, exportando arquivos de texto com os resultados; estes arquivos,
+então, são lidos por um \textit{script} Python que gera os gráficos
+correspondentes.
+
+O programa principal possui a seguinte estrutura, descrita em C:
+
+\begin{Verbatim}[fontsize=\footnotesize]
+// Vetores para concentração no tempo `n' e no tempo `n+1', respectivamente
+double Q_old[];
+double Q_new[];
+
+// Para cada método, os vetores são inicializados e as concentrações são
+// calculadas
+
+// Método FTBS
+// Inicializa ambos os vetores com a função de concentração inicial
+initializeArray(Q_old, nx, A, B, C, D, E)
+initializeArray(Q_new, nx, A, B, C, D, E)
+
+// Calcula Q através do método FTBS
+calculateQ_FTBS(Q_old, Q_new);
+
+// Imprime na tela e salva os resultados no arquivo de texto
+printAndSaveResults(Q_new, nx, FTBS);
+
+// Método L-F
+initializeArray(Q_old, nx, A, B, C, D, E)
+initializeArray(Q_new, nx, A, B, C, D, E)
+calculateQ_LF(Q_old, Q_new);
+printAndSaveResults(Q_new, nx, LF);
+
+// Método L-W
+initializeArray(Q_old, nx, A, B, C, D, E)
+initializeArray(Q_new, nx, A, B, C, D, E)
+calculateQ_LW(Q_old, Q_new);
+printAndSaveResults(Q_new, nx, LW);
+
+// Método B-W
+initializeArray(Q_old, nx, A, B, C, D, E)
+initializeArray(Q_new, nx, A, B, C, D, E)
+calculateQ_BW(Q_old, Q_new);
+printAndSaveResults(Q_new, nx, BW);
+\end{Verbatim}
+
+\noindent A função \verb|initializeArray| possui a seguinte estrutura:
+\begin{Verbatim}[fontsize=\footnotesize]
+int i;
+double x, s;
+
+// Laço `for' percorre todos os índices do vetor
+for (i = 0; i < nx; ++i) {
+
+    // Posição `x' (m) é definida como índice do volume * largura do volume
+    x = i * Delta_x;
+
+    // `s' recebe o valor de `E' somente se C <= x <= D
+    s = (x >= C && x <= D ? E : 0);
+
+    // Cada índice do vetor `Q' é inicializado segundo a condição inicial
+    Q[i] = exp( -A * ((x - b)*(x - b)) ) + s;
+}
+\end{Verbatim}
+
+\noindent Cada função \verb|calculateQ| possui a seguinte estrutura:
+
+\begin{Verbatim}[fontsize=\footnotesize]
+// Cálculo de Q, iterado ao longo do tempo
+do {
+
+    // Cálculo do volume da fronteira esquerda para o método Beam-Warming, que
+    // utiliza Lax-Wendroff apenas para este caso
+    if (method == BW) {leftBoudary(LW, 0);}
+
+    // Cálculo do volume da fronteira esquerda, onde `leftBoundary' é a função
+    // da fronteira esquerda específica a cada método. Caso o método seja
+    // `Beam-Warming', calcula-se o volume logo após a fronteira.
+    Q_new[0] = method == BW ? leftBoundary(method, 1) : leftBoudary(method, 0);
+
+    // Cálculo de volumes do centro da malha, onde `center' é a função do centro
+    // da malha específica a cada método. Este laço começa em `i = 2' caso o
+    // método seja B-W.
+    for (i = (method == BW ? 2 : 1); i < nx - 1; ++i) {
+        Q_new[i] = center(method, i);
+    }
+
+    // Cálculo do volume da fronteira direita, onde `rightBoundary' é a função
+    // da fronteira direita específica a cada método
+    Q_new[i] = rightBoundary(method, i);
+
+    // Vetor `Q_old' é atualizado com valores do `Q_new' para o próximo passo
+    // de tempo
+    for (i = 0; i < nx; ++i) {
+        Q_old[i] = Q_new[i];
+    }
+
+// Incrementa passo de tempo
+} while ( (t += Delta_t) <= t_final);
+\end{Verbatim}
+
+São definidos dois vetores, \verb|Q_old[]| e \verb|Q_new[]|, que correspondem as
+concentrações $Q$ no tempo $n$ e $n+1$, respectivamente. Antes do cálculo das
+concentrações, os vetores são inicializados, em um simples laço \verb|for|,
+seguindo a função de concentração inicial $e^{-A(x-b)^2} + s(x)$.
+
+A cada iteração do laço \verb|do-while|, o tempo \verb|t| é incrementado por uma
+quantidade \verb|Delta_t|, que obedece as regras de estabilidade descritas na
+seção anterior. Ao longo da iteração, o vetor \verb|Q_new[]| é calculado para as
+fronteiras e para o centro da malha, em função de \verb|Q_old[]|. Antes do fim
+da iteração, os vetores \verb|Q_old[]| são atualizados com os valores de
+\verb|Q_new[]|, o tempo é incrementado, e então a nova iteração é iniciada.
+
+Ao fim da execução, o vetor \verb|Q_new[]|, terá os resultados da concentração
+de cada volume da malha, correspondente a cada índice do vetor, no tempo
+\verb|t = t_final|. Os pares índice-concentração são exportados em um arquivo
+de texto, para cada método, linha-a-linha, para serem lidos e plotados pelo
+\textit{script} Python.

@@ -1,0 +1,4 @@
+.vscode/
+code/bin/*
+!code/bin/.gitkeep
+code/debug
