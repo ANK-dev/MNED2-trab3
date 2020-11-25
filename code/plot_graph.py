@@ -9,46 +9,38 @@ import matplotlib.pyplot as plt
 x0, y0 = [], []
 x1, y1 = [], []
 x2, y2 = [], []
-x3, y3 = [], []
 parameters = {}
 
 def main():
     # Abre arquivos para leitura
-    # Arquivo FTBS
+    # Arquivo Upwind
     try:
         f0 = open('./results/results0.txt', 'r')
     except OSError as err:
         print("Erro ao abrir o arquivo 'results0.txt':", err)
 
-    # Arquivo Lax-Friedrichs
+    # Arquivo Superbee
     try:
         f1 = open('./results/results1.txt', 'r')
     except OSError as err:
         print("Erro ao abrir o arquivo 'results1.txt':", err)
 
-    # Arquivo Lax-Wendroff
+    # Arquivo Van Albada
     try:
         f2 = open('./results/results2.txt', 'r')
     except OSError as err:
         print("Erro ao abrir o arquivo 'results2.txt':", err)
 
-    # Arquivo Beam-Warming
-    try:
-        f3 = open('./results/results3.txt', 'r')
-    except OSError as err:
-        print("Erro ao abrir o arquivo 'results3.txt':", err)
 
     # Extrai informações dos arquivos
     data_extract(f0, x0, y0)
     data_extract(f1, x1, y1)
     data_extract(f2, x2, y2)
-    data_extract(f3, x3, y3)
 
     # Plota os gráficos de cada método
     plot_graph(x0, y0, 0)
     plot_graph(x1, y1, 1)
     plot_graph(x2, y2, 2)
-    plot_graph(x3, y3, 3)
 
     # Exibe os gráficos
     plt.show()
@@ -69,8 +61,8 @@ def data_extract(f, x, y):
 
 
 def plot_graph(x, y, id):
-    methods = {0:'FTBS', 1:'Lax-Friedrichs', 2:'Lax-Wendroff', 3:'Beam-Warming'}
-    colors  = {0: 'red', 1: 'green',         2: 'blue',        3: 'yellow'}
+    methods = {0: 'Upwind', 1:'Superbee', 2:'Van Albada'}
+    colors  = {0: 'red',    1: 'green',   2: 'blue'}
     fig,ax  = plt.subplots()
     fig.set_size_inches(8, 7)
     ax.grid(True)

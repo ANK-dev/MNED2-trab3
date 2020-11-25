@@ -1,5 +1,5 @@
 /******************************************************************************
- *        Métodos Numéricos para Equações Diferenciais II -- Trabalho 2       *
+ *        Métodos Numéricos para Equações Diferenciais II -- Trabalho 3       *
  *                          Ariel Nogueira Kovaljski                          *
  ******************************************************************************/
 
@@ -22,14 +22,18 @@
 
 /*============================================================================*/
 
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define MAX3(a,b,c) (MAX(MAX((a),(b)), (c)))
+
 /* Métodos utilizados para o cálculo de Q neste trabalho */
-enum methods {FTBS, LF, LW, BW};
+enum methods {UPWIND, SUPERBEE, VAN_ALBADA};
 
 void listParameters();
 void initializeArray(double arr[], int len, double a, double b, double c,
                      double d, double e);
-void calculateQ_FTBS(double old_arr[], double new_arr[]);
-void calculateQ_LF(double old_arr[], double new_arr[]);
-void calculateQ_LW(double old_arr[], double new_arr[]);
-void calculateQ_BW(double old_arr[], double new_arr[]);
+void calculateQ(double old[], double new[], double (*psi)(double theta));
+double upwind(double theta);
+double superbee(double theta);
+double vanAlbada(double theta);
 void printAndSaveResults(double arr[], int len, int method);

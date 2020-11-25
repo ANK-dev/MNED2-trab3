@@ -1,48 +1,43 @@
 /******************************************************************************
- *        Métodos Numéricos para Equações Diferenciais II -- Trabalho 2       *
+ *        Métodos Numéricos para Equações Diferenciais II -- Trabalho 3       *
  *                          Ariel Nogueira Kovaljski                          *
  ******************************************************************************/
+
+#include "main.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "main.h"
 
 int main(void)
 {
     double Q_new[NX];   /* Array de Q no tempo n+1 */
     double Q_old[NX];   /* Array de Q no tempo n */
 
-    puts("MNED II - Trabalho 2\n"
+    puts("MNED II - Trabalho 3\n"
          "====================\n"
          "por Ariel Nogueira Kovaljski\n");
 
     listParameters();
 
-    /* Cálculo de Q via método Forward Time-Backward Space (FTBS) */
+    /* Cálculo de Q via método Upwind */
     initializeArray(Q_old, NX, A, B, C, D, E);
     initializeArray(Q_new, NX, A, B, C, D, E);
-    calculateQ_FTBS(Q_old, Q_new);
-    printAndSaveResults(Q_new, NX, FTBS);
+    calculateQ(Q_old, Q_new, upwind);
+    printAndSaveResults(Q_new, NX, UPWIND);
 
-    /* Cálculo de Q via método Lax-Friedrichs */
+    /* Cálculo de Q via método Superbee */
     initializeArray(Q_old, NX, A, B, C, D, E);
     initializeArray(Q_new, NX, A, B, C, D, E);
-    calculateQ_LF(Q_old, Q_new);
-    printAndSaveResults(Q_new, NX, LF);
+    calculateQ(Q_old, Q_new, superbee);
+    printAndSaveResults(Q_new, NX, SUPERBEE);
 
-    /* Cálculo de Q via método Lax-Wendroff */
+    /* Cálculo de Q via método Van Albada */
     initializeArray(Q_old, NX, A, B, C, D, E);
     initializeArray(Q_new, NX, A, B, C, D, E);
-    calculateQ_LW(Q_old, Q_new);
-    printAndSaveResults(Q_new, NX, LW);
-
-    /* Cálculo de Q via método Beam-Warmimg */
-    initializeArray(Q_old, NX, A, B, C, D, E);
-    initializeArray(Q_new, NX, A, B, C, D, E);
-    calculateQ_BW(Q_old, Q_new);
-    printAndSaveResults(Q_new, NX, BW);
+    calculateQ(Q_old, Q_new, vanAlbada);
+    printAndSaveResults(Q_new, NX, VAN_ALBADA);
 
     return 0;
 }
@@ -80,294 +75,81 @@ void initializeArray(double arr[], int len, double a, double b, double c,
     }
 }
 
-/* Calcula as concentrações na malha ao longo do tempo */
-/* Método Forward Time-Backward Space (FTBS) */
-void calculateQ_FTBS(double old[], double new[])
+/* calcula Q, recebendo como ponteiro a função `psi`*/
+void calculateQ( double old[], double new[], double (*psi)(double theta) )
 {
     int i;
-    int progress = 0, progress_count = 0;
-    int progress_incr = (T_FINAL/DELTA_T) * 5.0 / 100;
-    double t = 0;
-
-    puts("Calculando FTBS...");
+    double t = 0, theta_minus_half, theta_plus_half;
 
     do {
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *               ^
-         *            Para o volume da fronteira esquerda
-         *        o índice 0 refere-se ao volume nº 1 da malha
-         */
-        new[0] = old[0];
+        /* Fronteira esquerda */
+        theta_plus_half = 0;
 
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *                     ^     ^     ^     ^     ^
-         *                  Para os volumes do centro 
-         *               e na fronteira direita da malha
-         */
+        new[0] = old[0] - 1/2 * C * (1-C) * (
+                     psi(theta_plus_half) * (old[2] - old[1])
+                 );
+
+        /* Centro */
         for (i = 1; i < NX; ++i) {
-            new[i] = old[i] - U_BAR*DELTA_T/DELTA_X * (
+            theta_minus_half = (old[i-1] - old[i-2]) / (old[i]   - old[i-1]);
+            theta_plus_half  = (old[i]   - old[i-1]) / (old[i+1] - old[i]  );
+
+            new[i] = old[i] - C * (
                          old[i] - old[i-1]
+                     ) - 1/2 * C * (1-C) * (
+                           psi(theta_plus_half)  * (old[i+1] - old[i]  ) 
+                         - psi(theta_minus_half) * (old[i]   - old[i-1])
                      );
         }
 
-        /* Incrementa o progresso a cada 5% */
-        if (progress_count == progress_incr){
-            progress_count = 0;
-            ++progress;
-            printf("\rCalculando... %d%% concluido", progress * 5);
-            fflush(stdout);
-        }
+        /* Fronteira direita */
+        theta_minus_half = (old[i-1] - old[i-2]) / (old[i] - old[i-1]);
 
-        /* Atualiza array de valores antigos com os novos para o próximo
-           passo de tempo */
-        for (i = 0; i < NX; ++i) {
-            old[i] = new[i];
-        }
+        new[i] = old[i] - C * (
+                     old[i] - old[i-1]
+                 ) - 1/2 * C * (1-C) * (
+                     - psi(theta_minus_half) * (old[i]   - old[i-1])
+                 );
+        
+    } while ( (t += DELTA_T) < T_FINAL);
+}
 
-        /* Incrementa contador para cada 5% */
-        ++progress_count;
 
-    } while ( (t += DELTA_T) <= T_FINAL );
+double upwind(double theta)
+{
+    return (theta = 0);
 }
 
 /* Método Lax-Friedrichs */
-void calculateQ_LF(double old[], double new[])
+double superbee(double theta)
 {
-    int i;
-    int progress = 0, progress_count = 0;
-    int progress_incr = (T_FINAL/DELTA_T) * 5.0 / 100;
-    double t = 0;
-
-    puts("Calculando Lax-Friedrichs...");
-
-    do {
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *               ^
-         *            Para o volume da fronteira esquerda
-         *        o índice 0 refere-se ao volume nº 1 da malha
-         */
-        new[0] = (
-                     old[1] + old[0]
-                 )/2 - U_BAR*DELTA_T/(2*DELTA_X) * (
-                     old[1] - old[0]
-                 );
-
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *                     ^     ^     ^     ^
-         *             Para os volumes do centro da malha
-         */
-        for (i = 1; i < NX - 1; ++i) {
-            new[i] = (
-                         old[i+1] + old[i-1]
-                     )/2 - U_BAR*DELTA_T/(2*DELTA_X) * (
-                         old[i+1] - old[i-1]
-                     );
-        }
-
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *                                             ^
-         *             Para o volume da fronteira direita
-         *            i possui valor de NX - 1 nesse ponto
-         */
-        new[i] = (
-                     old[i] + old[i-1]
-                 )/2 - U_BAR*DELTA_T/(2*DELTA_X) * (
-                     old[i] - old[i-1]
-                 );
-
-        /* Incrementa o progresso a cada 5% */
-        if (progress_count == progress_incr){
-            progress_count = 0;
-            ++progress;
-            printf("\rCalculando... %d%% concluido", progress * 5);
-            fflush(stdout);
-        }
-
-        /* Atualiza array de valores antigos com os novos para o próximo
-           passo de tempo */
-        for (i = 0; i < NX; ++i) {
-            old[i] = new[i];
-        }
-
-        /* Incrementa contador para cada 5% */
-        ++progress_count;
-
-    } while ( (t += DELTA_T) <= T_FINAL );
+    return MAX3(0, MIN(1, 2*theta), MIN(2, theta));
 }
 
 /* Método Lax-Wendroff */
-void calculateQ_LW(double old[], double new[])
+double vanAlbada(double theta)
 {
-    int i;
-    int progress = 0, progress_count = 0;
-    int progress_incr = (T_FINAL/DELTA_T) * 5.0 / 100;
-    double t = 0;
-
-    puts("Calculando Lax-Wendroff...");
-
-    do {
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *               ^
-         *            Para o volume da fronteira esquerda
-         *        o índice 0 refere-se ao volume nº 1 da malha
-         */
-        new[0] = old[0] - U_BAR*DELTA_T/(2*DELTA_X) * (
-                     old[1] - old[0]
-                 ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                     old[1] - old[0]
-                 );
-
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *                     ^     ^     ^     ^
-         *             Para os volumes do centro da malha
-         */
-        for (i = 1; i < NX - 1; ++i) {
-            new[i] = old[i] - U_BAR*DELTA_T/(2*DELTA_X) * (
-                         old[i+1] - old[i-1]
-                     ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                         old[i+1] - 2*old[i] + old[i-1]
-                     );
-        }
-
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *                                             ^
-         *             Para o volume da fronteira direita
-         *            i possui valor de NX - 1 nesse ponto
-         */
-        new[i] = old[i] - U_BAR*DELTA_T/(2*DELTA_X) * (
-                     old[i] - old[i-1]
-                 ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                     old[i-1] - old[i]
-                 );
-
-        /* Incrementa o progresso a cada 5% */
-        if (progress_count == progress_incr){
-            progress_count = 0;
-            ++progress;
-            printf("\rCalculando... %d%% concluido", progress * 5);
-            fflush(stdout);
-        }
-
-        /* Atualiza array de valores antigos com os novos para o próximo
-           passo de tempo */
-        for (i = 0; i < NX; ++i) {
-            old[i] = new[i];
-        }
-
-        /* Incrementa contador para cada 5% */
-        ++progress_count;
-
-    } while ( (t += DELTA_T) <= T_FINAL );
-}
-
-/* Método Beam-Warming */
-void calculateQ_BW(double old[], double new[])
-{
-    int i;
-    int progress = 0, progress_count = 0;
-    int progress_incr = (T_FINAL/DELTA_T) * 5.0 / 100;
-    double t = 0;
-    
-    puts("Calculando Beam-Warming...");
-
-    do {
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *               ^
-         *            Para o volume da fronteira esquerda
-         *        o índice 0 refere-se ao volume nº 1 da malha.
-         *     O método de Lax-Wendroff é utilizado para este caso
-         */
-        new[0] = old[0] - U_BAR*DELTA_T/(2*DELTA_X) * (
-                     old[1] - old[0]
-                 ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                     old[1] - old[0]
-                 );
-
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *                     ^ 
-         *         Para o volume logo após a fronteira esquerda
-         */
-        new[1] = old[1] - 3 * U_BAR*DELTA_T/(2*DELTA_X) * (
-                     old[1] - old[0]
-                 ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                     old[1] - old[0]
-                 );
-                 
-        /*************************************************************
-         *
-         *            |==@==|==@==|==@==|==@==|==@==|==@==|
-         *                           ^     ^     ^     ^
-         *                  Para os volumes do centro 
-         *               e na fronteira direita da malha
-         */
-        for (i = 2; i < NX; ++i) {
-            new[i] = old[i] - U_BAR*DELTA_T/(2*DELTA_X) * (
-                         3*old[i] - 4*old[i-1] + old[i-2]
-                     ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                         old[i] - 2*old[i-1] + old[i-2]
-                     );
-        }
-
-        /* Incrementa o progresso a cada 5% */
-        if (progress_count == progress_incr){
-            progress_count = 0;
-            ++progress;
-            printf("\rCalculando... %d%% concluido", progress * 5);
-            fflush(stdout);
-        }
-
-        /* Atualiza array de valores antigos com os novos para o próximo
-           passo de tempo */
-        for (i = 0; i < NX; ++i) {
-            old[i] = new[i];
-        }
-
-        /* Incrementa contador para cada 5% */
-        ++progress_count;
-
-    } while ( (t += DELTA_T) <= T_FINAL );
+    return ( (theta * theta) + theta ) / ( (theta * theta) + 1 );
 }
 
 /* Imprime na tela e salva os resultados num arquivo de saída */
 void printAndSaveResults(double arr[], int len, int method)
 {
     int i;
-    char filename[50], file0[50], file1[50];
+    char filename[50], file0[100], file1[100];
     FILE *results_file;     /* Ponteiro para o arquivo de resultados */
 
     /* Prepara nome do arquivo de saída */
+    /* ATENÇÃO: verificar se não há buffer overflow! */
     switch (method) {
-        case FTBS:
-            snprintf(filename, 50, "%s%d%s", "results", method, ".txt");
+        case UPWIND:
+            sprintf(filename, "%s%d%s", "results", method, ".txt");
             break;
-        case LF:
-            snprintf(filename, 50, "%s%d%s", "results", method, ".txt");
+        case SUPERBEE:
+            sprintf(filename, "%s%d%s", "results", method, ".txt");
             break;
-        case LW:
-            snprintf(filename, 50, "%s%d%s", "results", method, ".txt");
-            break;
-        case BW:
-            snprintf(filename, 50, "%s%d%s", "results", method, ".txt");
+        case VAN_ALBADA:
+            sprintf(filename, "%s%d%s", "results", method, ".txt");
             break;
     }
 
@@ -380,12 +162,14 @@ void printAndSaveResults(double arr[], int len, int method)
 
     /* Error Handling -- Verifica se é possível criar/escrever o arquivo de
                          resultados */
-    snprintf(file0, 50, "%s%s", "./results/", filename);
-    snprintf(file1, 50, "%s%s", "./../results/", filename);
+    /* ATENÇÃO: verificar se não há buffer overflow! */
+    sprintf(file0, "%s%s", "./results/",    filename);
+    sprintf(file1, "%s%s", "./../results/", filename);
     if (   ( results_file = fopen(file0, "w") ) == NULL
-        && ( results_file = fopen(file1, "w") ) == NULL) {
-        fprintf(stderr, "[ERR] Houve um erro ao escrever o arquivo \"%s\"! "
-                        "Os resultados nao foram salvos.\n", filename);
+        && ( results_file = fopen(file1, "w") ) == NULL ) {
+        fprintf(stderr, 
+                "[ERR] Houve um erro ao escrever o arquivo \"%s\"! "
+                "Os resultados nao foram salvos.\n", filename);
         exit(1);
     }
 
