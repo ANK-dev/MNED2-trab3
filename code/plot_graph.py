@@ -64,8 +64,9 @@ def plot_graph(x, y, id):
     methods = {0: 'Upwind', 1:'Superbee', 2:'Van Albada'}
     colors  = {0: 'red',    1: 'green',   2: 'blue'}
     fig,ax  = plt.subplots()
-    fig.set_size_inches(8, 7)
+    fig.set_size_inches(12, 7)
     ax.grid(True)
+    ax.set(ylim=(0,1))
 
     plt.suptitle(f"Método {methods[id]}: Concentração X Posição")
     plt.title(rf"$nx = {parameters['nx']}$, " 

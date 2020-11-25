@@ -22,18 +22,21 @@ int main(void)
     listParameters();
 
     /* Cálculo de Q via método Upwind */
+    puts("Calculando Q via metodo Upwind...");
     initializeArray(Q_old, NX, A, B, C, D, E);
     initializeArray(Q_new, NX, A, B, C, D, E);
     calculateQ(Q_old, Q_new, upwind);
     printAndSaveResults(Q_new, NX, UPWIND);
 
     /* Cálculo de Q via método Superbee */
+    puts("Calculando Q via metodo Superbee...");
     initializeArray(Q_old, NX, A, B, C, D, E);
     initializeArray(Q_new, NX, A, B, C, D, E);
     calculateQ(Q_old, Q_new, superbee);
     printAndSaveResults(Q_new, NX, SUPERBEE);
 
     /* Cálculo de Q via método Van Albada */
+    puts("Calculando Q via metodo Van Albada...");
     initializeArray(Q_old, NX, A, B, C, D, E);
     initializeArray(Q_new, NX, A, B, C, D, E);
     calculateQ(Q_old, Q_new, vanAlbada);
@@ -75,61 +78,120 @@ void initializeArray(double arr[], int len, double a, double b, double c,
     }
 }
 
-/* calcula Q, recebendo como ponteiro a função `psi`*/
+double thetaPlusHalf(double arr[], int i) 
+{
+    int a, b, c;
+
+    /* Aplica condição de contorno / volume fantasma */
+    a = (i - 1) < 0 ? i : (i - 1);
+    b = i;
+    c = i + 1;
+
+    /* Workaround para divisão por zero */
+    if (arr[c] - arr[b] == 0) {
+        return (arr[b] - arr[a]) / 1e-10;
+    }
+
+    return (arr[b] - arr[a]) / (arr[c] - arr[b]);
+}
+
+double thetaMinusHalf(double arr[], int i) 
+{
+    int a, b, c;
+    
+    /* Aplica condição de contorno / volume fantasma */
+    a = (i - 2) < 0 ? i : (i - 2);
+    b = (i - 1) < 0 ? i : (i - 1);
+    c = i;
+
+    /* Workaround para divisão por zero */
+    if (arr[c] - arr[b] == 0) {
+        return (arr[b] - arr[a]) / 1e-10;
+    }
+
+    return (arr[b] - arr[a]) / (arr[c] - arr[b]);
+}
+
+/* calcula Q, recebendo como ponteiro a função `psi` */
 void calculateQ( double old[], double new[], double (*psi)(double theta) )
 {
     int i;
-    double t = 0, theta_minus_half, theta_plus_half;
+    double t = 0;
 
     do {
-        /* Fronteira esquerda */
-        theta_plus_half = 0;
-
-        new[0] = old[0] - 1/2 * C * (1-C) * (
-                     psi(theta_plus_half) * (old[2] - old[1])
+        /* 
+         *                     Fronteira esquerda 
+         *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
+         *                  ^ 
+         */
+        i = 0;
+        new[i] = old[i] - 1/2 * C * (1-C) * (
+                     psi(thetaPlusHalf(old, i)) * (old[i+1] - old[i])
                  );
 
-        /* Centro */
-        for (i = 1; i < NX; ++i) {
-            theta_minus_half = (old[i-1] - old[i-2]) / (old[i]   - old[i-1]);
-            theta_plus_half  = (old[i]   - old[i-1]) / (old[i+1] - old[i]  );
+        /* 
+         *                  Após a fronteira esquerda 
+         *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
+         *                      ^ 
+         */
+        i = 1;
+        new[i] = old[i] - C * (
+                        old[i] - old[i-1]
+                    ) - 1/2 * C * (1-C) * (
+                          psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  ) 
+                        - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
+                    );
 
+        /* 
+         *                            Centro
+         *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
+         *                          ^   ^   ^   ^
+         */
+        for (i = 2; i < NX - 1; ++i) {
             new[i] = old[i] - C * (
                          old[i] - old[i-1]
                      ) - 1/2 * C * (1-C) * (
-                           psi(theta_plus_half)  * (old[i+1] - old[i]  ) 
-                         - psi(theta_minus_half) * (old[i]   - old[i-1])
+                           psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  ) 
+                         - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                      );
         }
 
-        /* Fronteira direita */
-        theta_minus_half = (old[i-1] - old[i-2]) / (old[i] - old[i-1]);
-
+        /* 
+         *                      Fronteira direita
+         *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
+         *                                          ^ 
+         */
         new[i] = old[i] - C * (
                      old[i] - old[i-1]
                  ) - 1/2 * C * (1-C) * (
-                     - psi(theta_minus_half) * (old[i]   - old[i-1])
+                     - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                  );
-        
-    } while ( (t += DELTA_T) < T_FINAL);
+
+       /* Atualiza array de valores antigos com os novos para o próximo
+          passo de tempo */
+        for (i = 0; i < NX; ++i) {
+            old[i] = new[i];
+        }      
+
+    } while ( (t += DELTA_T) <= T_FINAL);
 }
 
-
+/* Método Upwind */
 double upwind(double theta)
 {
     return (theta = 0);
 }
 
-/* Método Lax-Friedrichs */
+/* Método Superbee */
 double superbee(double theta)
 {
     return MAX3(0, MIN(1, 2*theta), MIN(2, theta));
 }
 
-/* Método Lax-Wendroff */
+/* Método Van Albada */
 double vanAlbada(double theta)
 {
-    return ( (theta * theta) + theta ) / ( (theta * theta) + 1 );
+    return ( (theta*theta) + theta ) / ( (theta*theta) + 1 );
 }
 
 /* Imprime na tela e salva os resultados num arquivo de saída */
@@ -140,7 +202,6 @@ void printAndSaveResults(double arr[], int len, int method)
     FILE *results_file;     /* Ponteiro para o arquivo de resultados */
 
     /* Prepara nome do arquivo de saída */
-    /* ATENÇÃO: verificar se não há buffer overflow! */
     switch (method) {
         case UPWIND:
             sprintf(filename, "%s%d%s", "results", method, ".txt");
@@ -154,7 +215,7 @@ void printAndSaveResults(double arr[], int len, int method)
     }
 
     /* Imprime os resultados no console */
-    printf("\n\nQ[%d] (tempo final: %.2fs) = [", NX, T_FINAL);
+    printf("Q[%d] (tempo final: %.2fs) = [", NX, T_FINAL);
     for (i = 0; i < len - 1; ++i) {
         printf("%f, ", arr[i]);
     }
