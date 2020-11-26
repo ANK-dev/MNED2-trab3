@@ -52,7 +52,7 @@ void listParameters()
     printf("DELTA_T = %f, DELTA_X = %f, U_BAR = %3.2e\n\n",
            DELTA_T, DELTA_T, U_BAR);
     puts("Constantes da simulacao:");
-    printf("NX = %d, T_FINAL = %f\n\n", NX, T_FINAL);
+    printf("LX = %f, NX = %d, T_FINAL = %f\n\n", LX, NX, T_FINAL);
 }
 
 /* Inicializa um array para um valor de entrada */
@@ -83,13 +83,14 @@ double thetaPlusHalf(double arr[], int i)
     int a, b, c;
 
     /* Aplica condição de contorno / volume fantasma */
-    a = (i - 1) < 0 ? i : (i - 1);
+    a = (i - 1) < 0 ? 0 : (i - 1);
     b = i;
     c = i + 1;
 
     /* Workaround para divisão por zero */
     if (arr[c] - arr[b] == 0) {
-        return (arr[b] - arr[a]) / 1e-10;
+        /* return (arr[b] - arr[a]) / 1e-10; */
+        return 0;
     }
 
     return (arr[b] - arr[a]) / (arr[c] - arr[b]);
@@ -100,13 +101,14 @@ double thetaMinusHalf(double arr[], int i)
     int a, b, c;
     
     /* Aplica condição de contorno / volume fantasma */
-    a = (i - 2) < 0 ? i : (i - 2);
-    b = (i - 1) < 0 ? i : (i - 1);
+    a = (i - 2) < 0 ? 0 : (i - 2);
+    b = (i - 1) < 0 ? 0 : (i - 1);
     c = i;
 
     /* Workaround para divisão por zero */
     if (arr[c] - arr[b] == 0) {
-        return (arr[b] - arr[a]) / 1e-10;
+        /* return (arr[b] - arr[a]) / 1e-10; */
+        return 0;
     }
 
     return (arr[b] - arr[a]) / (arr[c] - arr[b]);
@@ -125,7 +127,7 @@ void calculateQ( double old[], double new[], double (*psi)(double theta) )
          *                  ^ 
          */
         i = 0;
-        new[i] = old[i] - 1/2 * C * (1-C) * (
+        new[i] = old[i] - C/2 * (1-C) * (
                      psi(thetaPlusHalf(old, i)) * (old[i+1] - old[i])
                  );
 
@@ -137,7 +139,7 @@ void calculateQ( double old[], double new[], double (*psi)(double theta) )
         i = 1;
         new[i] = old[i] - C * (
                         old[i] - old[i-1]
-                    ) - 1/2 * C * (1-C) * (
+                    ) - C/2 * (1-C) * (
                           psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  ) 
                         - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                     );
@@ -150,7 +152,7 @@ void calculateQ( double old[], double new[], double (*psi)(double theta) )
         for (i = 2; i < NX - 1; ++i) {
             new[i] = old[i] - C * (
                          old[i] - old[i-1]
-                     ) - 1/2 * C * (1-C) * (
+                     ) - C/2 * (1-C) * (
                            psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  ) 
                          - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                      );
@@ -163,7 +165,7 @@ void calculateQ( double old[], double new[], double (*psi)(double theta) )
          */
         new[i] = old[i] - C * (
                      old[i] - old[i-1]
-                 ) - 1/2 * C * (1-C) * (
+                 ) - C/2 * (1-C) * (
                      - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                  );
 
@@ -223,7 +225,6 @@ void printAndSaveResults(double arr[], int len, int method)
 
     /* Error Handling -- Verifica se é possível criar/escrever o arquivo de
                          resultados */
-    /* ATENÇÃO: verificar se não há buffer overflow! */
     sprintf(file0, "%s%s", "./results/",    filename);
     sprintf(file1, "%s%s", "./../results/", filename);
     if (   ( results_file = fopen(file0, "w") ) == NULL

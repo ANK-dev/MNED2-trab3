@@ -1,4 +1,9 @@
 .vscode/
+
 code/bin/*
 !code/bin/.gitkeep
+
 code/debug
+
+code/results/fig/*
+!code/results/fig/.gitkeep
