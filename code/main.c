@@ -89,8 +89,8 @@ double thetaPlusHalf(double arr[], int i)
 
     /* Workaround para divisão por zero */
     if (arr[c] - arr[b] == 0) {
-        /* return (arr[b] - arr[a]) / 1e-10; */
-        return 0;
+        return (arr[b] - arr[a]) / 1e-10;
+        /* return 0; */
     }
 
     return (arr[b] - arr[a]) / (arr[c] - arr[b]);
@@ -107,8 +107,8 @@ double thetaMinusHalf(double arr[], int i)
 
     /* Workaround para divisão por zero */
     if (arr[c] - arr[b] == 0) {
-        /* return (arr[b] - arr[a]) / 1e-10; */
-        return 0;
+        return (arr[b] - arr[a]) / 1e-10;
+        /* return 0; */
     }
 
     return (arr[b] - arr[a]) / (arr[c] - arr[b]);
@@ -127,7 +127,7 @@ void calculateQ( double old[], double new[], double (*psi)(double theta) )
          *                  ^ 
          */
         i = 0;
-        new[i] = old[i] - C/2 * (1-C) * (
+        new[i] = old[i] - COURANT/2 * (1-COURANT) * (
                      psi(thetaPlusHalf(old, i)) * (old[i+1] - old[i])
                  );
 
@@ -137,9 +137,9 @@ void calculateQ( double old[], double new[], double (*psi)(double theta) )
          *                      ^ 
          */
         i = 1;
-        new[i] = old[i] - C * (
+        new[i] = old[i] - COURANT * (
                         old[i] - old[i-1]
-                    ) - C/2 * (1-C) * (
+                    ) - COURANT/2 * (1-COURANT) * (
                           psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  ) 
                         - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                     );
@@ -150,9 +150,9 @@ void calculateQ( double old[], double new[], double (*psi)(double theta) )
          *                          ^   ^   ^   ^
          */
         for (i = 2; i < NX - 1; ++i) {
-            new[i] = old[i] - C * (
+            new[i] = old[i] - COURANT * (
                          old[i] - old[i-1]
-                     ) - C/2 * (1-C) * (
+                     ) - COURANT/2 * (1-COURANT) * (
                            psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  ) 
                          - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                      );
@@ -163,9 +163,9 @@ void calculateQ( double old[], double new[], double (*psi)(double theta) )
          *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
          *                                          ^ 
          */
-        new[i] = old[i] - C * (
+        new[i] = old[i] - COURANT * (
                      old[i] - old[i-1]
-                 ) - C/2 * (1-C) * (
+                 ) - COURANT/2 * (1-COURANT) * (
                      - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                  );
 
