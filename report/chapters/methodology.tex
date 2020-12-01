@@ -186,13 +186,13 @@ printAndSaveResults(Q_new, NX, UPWIND);
 // Método Superbee
 initializeArray(Q_old, NX, A, B, C, D, E)
 initializeArray(Q_new, NX, A, B, C, D, E)
-calculateQ_LF(Q_old, Q_new, superbee);
+calculateQ(Q_old, Q_new, superbee);
 printAndSaveResults(Q_new, NX, SUPERBEE);
 
 // Método Van Albada
 initializeArray(Q_old, NX, A, B, C, D, E)
 initializeArray(Q_new, NX, A, B, C, D, E)
-calculateQ_LW(Q_old, Q_new, vanAlbada);
+calculateQ(Q_old, Q_new, vanAlbada);
 printAndSaveResults(Q_new, NX, VAN_ALBADA);
 \end{Verbatim}
 
@@ -211,7 +211,7 @@ for (i = 0; i < nx; ++i) {
     s = (x >= C && x <= D ? E : 0);
 
     // Cada índice do vetor `Q' é inicializado segundo a condição inicial
-    Q[i] = exp( -A * ((x - b)*(x - b)) ) + s;
+    Q[i] = exp( -A * ((x - B)*(x - B)) ) + s;
 }
 \end{Verbatim}
 
