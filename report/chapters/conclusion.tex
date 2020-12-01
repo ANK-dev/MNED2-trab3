@@ -10,10 +10,9 @@ Neste trabalho, foi estudado o comportamento de quatro métodos, na busca da
 solução da equação da advecção.
 
 Seguindo as condições de estabilidade, foi possível perceber que métodos como o
-FTBS e Lax-Friedrichs possuem um comportamento bastante suave, com poucas
-oscilações, mas não tão boa acurácia. Métodos de alta resolução como
-Lax-Wendroff e Beam-Warming possuem melhor acurácia, mas sofrem de oscilações
-espúrias que prejudicam sua precisão.
+FTBS são de simples implementação, mas, devido a elevada difusão numérica,
+divergem do resultado analítco. Métodos TVD como Superbee e Van Albada possuem
+melhor acurácia, tendo pequena difusão numérica ao longo do tempo.
 
 A escolha dentre diferentes métodos é necessária dependendo dos parâmetros do
 problema físico e do projeto de engenharia a ser estudado. É necessário

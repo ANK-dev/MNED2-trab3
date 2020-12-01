@@ -6,18 +6,18 @@
 
 \begin{Verbatim}[fontsize=\footnotesize]
 /******************************************************************************
- *        Métodos Numéricos para Equações Diferenciais II -- Trabalho 2       *
- *                          Ariel Nogueira Kovaljski                          *
- ******************************************************************************/
+*        Métodos Numéricos para Equações Diferenciais II -- Trabalho 3       *
+*                          Ariel Nogueira Kovaljski                          *
+******************************************************************************/
 
 /*======================= Parâmetros a serem ajustados =======================*/
 
-#define LX      (10.0)              /* comprimento do domínio (em m)          */
-#define NX      (200)               /* número de células                      */
+#define LX      (20.0)              /* comprimento do domínio (em m)          */
+#define NX      (400)               /* número de células                      */
 #define DELTA_X (LX/NX)             /* largura de cada célula (em m)          */
-#define U_BAR   (2.0)               /* velocidade de escoamento (em m/s)      */
-#define T_FINAL (1.0)               /* tempo final da simulação (em segundos) */
-#define COURANT (0.9)               /* C: número de courant                   */
+#define U_BAR   (1.0)               /* velocidade de escoamento (em m/s)      */
+#define T_FINAL (2.0)               /* tempo final da simulação (em segundos) */
+#define COURANT (0.8)               /* número de courant                      */
 
 #define DELTA_T (COURANT*DELTA_X/U_BAR) /* passo de tempo (em segundos)       */
 
@@ -29,66 +29,70 @@
 
 /*============================================================================*/
 
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define MAX3(a,b,c) (MAX(MAX((a),(b)), (c)))
+
 /* Métodos utilizados para o cálculo de Q neste trabalho */
-enum methods {FTBS, LF, LW, BW};
+enum methods {UPWIND, SUPERBEE, VAN_ALBADA};
 
 void listParameters();
 void initializeArray(double arr[], int len, double a, double b, double c,
                      double d, double e);
-void calculateQ_FTBS(double old_arr[], double new_arr[]);
-void calculateQ_LF(double old_arr[], double new_arr[]);
-void calculateQ_LW(double old_arr[], double new_arr[]);
-void calculateQ_BW(double old_arr[], double new_arr[]);
+double thetaPlusHalf(double arr[], int i);
+double thetaMinusHalf(double arr[], int i);
+void calculateQ(double old[], double new[], double (*psi)(double theta));
+double upwind(double theta);
+double superbee(double theta);
+double vanAlbada(double theta);
 void printAndSaveResults(double arr[], int len, int method);
 \end{Verbatim}
 
 \subsubsection{Arquivo \texttt{main.c}}
 \begin{Verbatim}[fontsize=\footnotesize]
 /******************************************************************************
- *        Métodos Numéricos para Equações Diferenciais II -- Trabalho 2       *
- *                          Ariel Nogueira Kovaljski                          *
- ******************************************************************************/
+*        Métodos Numéricos para Equações Diferenciais II -- Trabalho 3       *
+*                          Ariel Nogueira Kovaljski                          *
+******************************************************************************/
+
+#include "main.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include "main.h"
 
 int main(void)
 {
     double Q_new[NX];   /* Array de Q no tempo n+1 */
     double Q_old[NX];   /* Array de Q no tempo n */
 
-    puts("MNED II - Trabalho 2\n"
+    puts("MNED II - Trabalho 3\n"
          "====================\n"
          "por Ariel Nogueira Kovaljski\n");
 
     listParameters();
 
-    /* Cálculo de Q via método Forward Time-Backward Space (FTBS) */
+    /* Cálculo de Q via método Upwind */
+    puts("Calculando Q via metodo Upwind...");
     initializeArray(Q_old, NX, A, B, C, D, E);
     initializeArray(Q_new, NX, A, B, C, D, E);
-    calculateQ_FTBS(Q_old, Q_new);
-    printAndSaveResults(Q_new, NX, FTBS);
+    calculateQ(Q_old, Q_new, upwind);
+    printAndSaveResults(Q_new, NX, UPWIND);
 
-    /* Cálculo de Q via método Lax-Friedrichs */
+    /* Cálculo de Q via método Superbee */
+    puts("Calculando Q via metodo Superbee...");
     initializeArray(Q_old, NX, A, B, C, D, E);
     initializeArray(Q_new, NX, A, B, C, D, E);
-    calculateQ_LF(Q_old, Q_new);
-    printAndSaveResults(Q_new, NX, LF);
+    calculateQ(Q_old, Q_new, superbee);
+    printAndSaveResults(Q_new, NX, SUPERBEE);
 
-    /* Cálculo de Q via método Lax-Wendroff */
+    /* Cálculo de Q via método Van Albada */
+    puts("Calculando Q via metodo Van Albada...");
     initializeArray(Q_old, NX, A, B, C, D, E);
     initializeArray(Q_new, NX, A, B, C, D, E);
-    calculateQ_LW(Q_old, Q_new);
-    printAndSaveResults(Q_new, NX, LW);
-
-    /* Cálculo de Q via método Beam-Warmimg */
-    initializeArray(Q_old, NX, A, B, C, D, E);
-    initializeArray(Q_new, NX, A, B, C, D, E);
-    calculateQ_BW(Q_old, Q_new);
-    printAndSaveResults(Q_new, NX, BW);
+    calculateQ(Q_old, Q_new, vanAlbada);
+    printAndSaveResults(Q_new, NX, VAN_ALBADA);
 
     return 0;
 }
@@ -100,7 +104,7 @@ void listParameters()
     printf("DELTA_T = %f, DELTA_X = %f, U_BAR = %3.2e\n\n",
            DELTA_T, DELTA_T, U_BAR);
     puts("Constantes da simulacao:");
-    printf("NX = %d, T_FINAL = %f\n\n", NX, T_FINAL);
+    printf("LX = %f, NX = %d, T_FINAL = %f\n\n", LX, NX, T_FINAL);
 }
 
 /* Inicializa um array para um valor de entrada */
@@ -126,312 +130,146 @@ void initializeArray(double arr[], int len, double a, double b, double c,
     }
 }
 
-/* Calcula as concentrações na malha ao longo do tempo */
-/* Método Forward Time-Backward Space (FTBS) */
-void calculateQ_FTBS(double old[], double new[])
+double thetaPlusHalf(double arr[], int i)
 {
-    int i;
-    int progress = 0, progress_count = 0;
-    int progress_incr = (T_FINAL/DELTA_T) * 5.0 / 100;
-    double t = 0;
+    int a, b, c;
 
-    puts("Calculando FTBS...");
+    /* Aplica condição de contorno / volume fantasma */
+    a = (i - 1) < 0 ? 0 : (i - 1);
+    b = i;
+    c = i + 1;
 
-    do {
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *               ^
-        *            Para o volume da fronteira esquerda
-        *        o índice 0 refere-se ao volume nº 1 da malha
-        */
-        new[0] = old[0];
+    /* Workaround para divisão por zero */
+    if (arr[c] - arr[b] == 0) {
+        return (arr[b] - arr[a]) / 1e-10;
+    }
 
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *                     ^     ^     ^     ^     ^
-        *                  Para os volumes do centro
-        *               e na fronteira direita da malha
-        */
-        for (i = 1; i < NX; ++i) {
-            new[i] = old[i] - U_BAR*DELTA_T/DELTA_X * (
-                old[i] - old[i-1]
-            );
-        }
-
-        /* Incrementa o progresso a cada 5% */
-        if (progress_count == progress_incr){
-            progress_count = 0;
-            ++progress;
-            printf("\rCalculando... %d%% concluido", progress * 5);
-            fflush(stdout);
-        }
-
-        /* Atualiza array de valores antigos com os novos para o próximo
-        passo de tempo */
-        for (i = 0; i < NX; ++i) {
-            old[i] = new[i];
-        }
-
-        /* Incrementa contador para cada 5% */
-        ++progress_count;
-
-    } while ( (t += DELTA_T) <= T_FINAL );
+    return (arr[b] - arr[a]) / (arr[c] - arr[b]);
 }
 
-/* Método Lax-Friedrichs */
-void calculateQ_LF(double old[], double new[])
+double thetaMinusHalf(double arr[], int i)
+{
+    int a, b, c;
+
+    /* Aplica condição de contorno / volume fantasma */
+    a = (i - 2) < 0 ? 0 : (i - 2);
+    b = (i - 1) < 0 ? 0 : (i - 1);
+    c = i;
+
+    /* Workaround para divisão por zero */
+    if (arr[c] - arr[b] == 0) {
+        return (arr[b] - arr[a]) / 1e-10;
+    }
+
+    return (arr[b] - arr[a]) / (arr[c] - arr[b]);
+}
+
+/* calcula Q, recebendo como ponteiro a função `psi` */
+void calculateQ( double old[], double new[], double (*psi)(double
+theta) )
 {
     int i;
-    int progress = 0, progress_count = 0;
-    int progress_incr = (T_FINAL/DELTA_T) * 5.0 / 100;
     double t = 0;
 
-    puts("Calculando Lax-Friedrichs...");
-
     do {
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *               ^
-        *            Para o volume da fronteira esquerda
-        *        o índice 0 refere-se ao volume nº 1 da malha
-        */
-        new[0] = (
-                    old[1] + old[0]
-                 )/2 - U_BAR*DELTA_T/(2*DELTA_X) * (
-                    old[1] - old[0]
+        /*
+         *                     Fronteira esquerda
+         *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
+         *                  ^
+         */
+        i = 0;
+        new[i] = old[i] - COURANT/2 * (1-COURANT) * (
+                     psi(thetaPlusHalf(old, i)) * (old[i+1] - old[i])
                  );
 
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *                     ^     ^     ^     ^
-        *             Para os volumes do centro da malha
-        */
+        /*
+         *                            Centro
+         *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
+         *                      ^   ^   ^   ^   ^
+         */
         for (i = 1; i < NX - 1; ++i) {
-            new[i] = (
-                        old[i+1] + old[i-1]
-                     )/2 - U_BAR*DELTA_T/(2*DELTA_X) * (
-                        old[i+1] - old[i-1]
+            new[i] = old[i] - COURANT * (
+                         old[i] - old[i-1]
+                     ) - COURANT/2 * (1-COURANT) * (
+                           psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  )
+                         - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                      );
         }
 
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *                                             ^
-        *             Para o volume da fronteira direita
-        *            i possui valor de NX - 1 nesse ponto
-        */
-        new[i] = (
-                    old[i] + old[i-1]
-                 )/2 - U_BAR*DELTA_T/(2*DELTA_X) * (
-                    old[i] - old[i-1]
+        /*
+         *                      Fronteira direita
+         *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
+         *                                          ^
+         */
+        new[i] = old[i] - COURANT * (
+                     old[i] - old[i-1]
+                 ) - COURANT/2 * (1-COURANT) * (
+                     - psi(thetaMinusHalf(old, i)) * (old[i] - old[i-1])
                  );
 
-        /* Incrementa o progresso a cada 5% */
-        if (progress_count == progress_incr){
-            progress_count = 0;
-            ++progress;
-            printf("\rCalculando... %d%% concluido", progress * 5);
-            fflush(stdout);
-        }
-
         /* Atualiza array de valores antigos com os novos para o próximo
-        passo de tempo */
+           passo de tempo */
         for (i = 0; i < NX; ++i) {
             old[i] = new[i];
         }
 
-        /* Incrementa contador para cada 5% */
-        ++progress_count;
-
-    } while ( (t += DELTA_T) <= T_FINAL );
+    } while ( (t += DELTA_T) <= T_FINAL);
 }
 
-/* Método Lax-Wendroff */
-void calculateQ_LW(double old[], double new[])
+/* Método Upwind */
+double upwind(double theta)
 {
-    int i;
-    int progress = 0, progress_count = 0;
-    int progress_incr = (T_FINAL/DELTA_T) * 5.0 / 100;
-    double t = 0;
-
-    puts("Calculando Lax-Wendroff...");
-
-    do {
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *               ^
-        *            Para o volume da fronteira esquerda
-        *        o índice 0 refere-se ao volume nº 1 da malha
-        */
-        new[0] = old[0] - U_BAR*DELTA_T/(2*DELTA_X) * (
-                    old[1] - old[0]
-                 ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                    old[1] - old[0]
-                 );
-
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *                     ^     ^     ^     ^
-        *             Para os volumes do centro da malha
-        */
-        for (i = 1; i < NX - 1; ++i) {
-            new[i] = old[i] - U_BAR*DELTA_T/(2*DELTA_X) * (
-                old[i+1] - old[i-1]
-            ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                old[i+1] - 2*old[i] + old[i-1]
-            );
-        }
-
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *                                             ^
-        *             Para o volume da fronteira direita
-        *            i possui valor de NX - 1 nesse ponto
-        */
-        new[i] = old[i] - U_BAR*DELTA_T/(2*DELTA_X) * (
-            old[i] - old[i-1]
-        ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-            old[i-1] - old[i]
-        );
-
-        /* Incrementa o progresso a cada 5% */
-        if (progress_count == progress_incr){
-            progress_count = 0;
-            ++progress;
-            printf("\rCalculando... %d%% concluido", progress * 5);
-            fflush(stdout);
-        }
-
-        /* Atualiza array de valores antigos com os novos para o próximo
-        passo de tempo */
-        for (i = 0; i < NX; ++i) {
-            old[i] = new[i];
-        }
-
-        /* Incrementa contador para cada 5% */
-        ++progress_count;
-
-    } while ( (t += DELTA_T) <= T_FINAL );
+    return (theta = 0);
 }
 
-/* Método Beam-Warming */
-void calculateQ_BW(double old[], double new[])
+/* Método Superbee */
+double superbee(double theta)
 {
-    int i;
-    int progress = 0, progress_count = 0;
-    int progress_incr = (T_FINAL/DELTA_T) * 5.0 / 100;
-    double t = 0;
+    return MAX3(0, MIN(1, 2*theta), MIN(2, theta));
+}
 
-    puts("Calculando Beam-Warming...");
-
-    do {
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *               ^
-        *            Para o volume da fronteira esquerda
-        *        o índice 0 refere-se ao volume nº 1 da malha.
-        *     O método de Lax-Wendroff é utilizado para este caso
-        */
-        new[0] = old[0] - U_BAR*DELTA_T/(2*DELTA_X) * (
-                    old[1] - old[0]
-                 ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                    old[1] - old[0]
-                 );
-
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *                     ^
-        *         Para o volume logo após a fronteira esquerda
-        */
-        new[1] = old[1] - 3 * U_BAR*DELTA_T/(2*DELTA_X) * (
-                    old[1] - old[0]
-                 ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                    old[1] - old[0]
-                 );
-
-        /*************************************************************
-        *
-        *            |==@==|==@==|==@==|==@==|==@==|==@==|
-        *                           ^     ^     ^     ^
-        *                  Para os volumes do centro
-        *               e na fronteira direita da malha
-        */
-        for (i = 2; i < NX; ++i) {
-            new[i] = old[i] - U_BAR*DELTA_T/(2*DELTA_X) * (
-                        3*old[i] - 4*old[i-1] + old[i-2]
-                     ) + (U_BAR*U_BAR)*(DELTA_T*DELTA_T)/(2*DELTA_X*DELTA_X) * (
-                        old[i] - 2*old[i-1] + old[i-2]
-                     );
-        }
-
-        /* Incrementa o progresso a cada 5% */
-        if (progress_count == progress_incr){
-            progress_count = 0;
-            ++progress;
-            printf("\rCalculando... %d%% concluido", progress * 5);
-            fflush(stdout);
-        }
-
-        /* Atualiza array de valores antigos com os novos para o próximo
-        passo de tempo */
-        for (i = 0; i < NX; ++i) {
-            old[i] = new[i];
-        }
-
-        /* Incrementa contador para cada 5% */
-        ++progress_count;
-
-    } while ( (t += DELTA_T) <= T_FINAL );
+/* Método Van Albada */
+double vanAlbada(double theta)
+{
+    return ( (theta*theta) + theta ) / ( (theta*theta) + 1 );
 }
 
 /* Imprime na tela e salva os resultados num arquivo de saída */
 void printAndSaveResults(double arr[], int len, int method)
 {
     int i;
-    char filename[50], file0[50], file1[50];
+    char filename[50], file0[100], file1[100];
     FILE *results_file;     /* Ponteiro para o arquivo de resultados */
 
     /* Prepara nome do arquivo de saída */
     switch (method) {
-        case FTBS:
-            snprintf(filename, 50, "%s%d%s", "results", method, ".txt");
+        case UPWIND:
+            sprintf(filename, "%s%d%s", "results", method, ".txt");
             break;
-        case LF:
-            snprintf(filename, 50, "%s%d%s", "results", method, ".txt");
+        case SUPERBEE:
+            sprintf(filename, "%s%d%s", "results", method, ".txt");
             break;
-        case LW:
-            snprintf(filename, 50, "%s%d%s", "results", method, ".txt");
-            break;
-        case BW:
-            snprintf(filename, 50, "%s%d%s", "results", method, ".txt");
+        case VAN_ALBADA:
+            sprintf(filename, "%s%d%s", "results", method, ".txt");
             break;
     }
 
     /* Imprime os resultados no console */
-    printf("\n\nQ[%d] (tempo final: %.2fs) = [", NX, T_FINAL);
+    printf("Q[%d] (tempo final: %.2fs) = [", NX, T_FINAL);
     for (i = 0; i < len - 1; ++i) {
         printf("%f, ", arr[i]);
     }
     printf("%f]\n\n", arr[i]);
 
-    /* Error Handling -- Verifica se é possível criar/escrever o arquivo de
-                         resultados */
-    snprintf(file0, 50, "%s%s", "./results/", filename);
-    snprintf(file1, 50, "%s%s", "./../results/", filename);
+    /* Error Handling -- Verifica se é possível criar/escrever o
+                         arquivo de resultados */
+    sprintf(file0, "%s%s", "./results/",    filename);
+    sprintf(file1, "%s%s", "./../results/", filename);
     if (   ( results_file = fopen(file0, "w") ) == NULL
-        && ( results_file = fopen(file1, "w") ) == NULL) {
-        fprintf(stderr, "[ERR] Houve um erro ao escrever o arquivo \"%s\"! "
-                        "Os resultados nao foram salvos.\n", filename);
+        && ( results_file = fopen(file1, "w") ) == NULL ) {
+        fprintf(stderr,
+                "[ERR] Houve um erro ao escrever o arquivo \"%s\"! "
+                "Os resultados nao foram salvos.\n", filename);
         exit(1);
     }
 
@@ -452,15 +290,16 @@ void printAndSaveResults(double arr[], int len, int method)
     fclose(results_file);   /* Fecha o arquivo */
 
     printf("[INFO] Os resultados foram salvos no arquivo \"%s\" "
-           "no diretorio \"results/\".\n\n", filename);
+    "no diretorio \"results/\".\n\n", filename);
 }
 \end{Verbatim}
 
+\pagebreak
 \subsection{Código do Gráfico (\texttt{plot\_graph.py})}
 
 \begin{Verbatim}[fontsize=\footnotesize]
 ################################################################################
-#         Métodos Numéricos para Equações Diferenciais II -- Trabalho 2        #
+#         Métodos Numéricos para Equações Diferenciais II -- Trabalho 3        #
 #                           Ariel Nogueira Kovaljski                           #
 ################################################################################
 
@@ -470,49 +309,41 @@ import matplotlib.pyplot as plt
 x0, y0 = [], []
 x1, y1 = [], []
 x2, y2 = [], []
-x3, y3 = [], []
 parameters = {}
 
 def main():
     # Abre arquivos para leitura
-    # Arquivo FTBS
+    # Arquivo Upwind
     try:
         f0 = open('./results/results0.txt', 'r')
     except OSError as err:
         print("Erro ao abrir o arquivo 'results0.txt':", err)
 
-    # Arquivo Lax-Friedrichs
+    # Arquivo Superbee
     try:
         f1 = open('./results/results1.txt', 'r')
     except OSError as err:
         print("Erro ao abrir o arquivo 'results1.txt':", err)
 
-    # Arquivo Lax-Wendroff
+    # Arquivo Van Albada
     try:
         f2 = open('./results/results2.txt', 'r')
     except OSError as err:
         print("Erro ao abrir o arquivo 'results2.txt':", err)
 
-    # Arquivo Beam-Warming
-    try:
-        f3 = open('./results/results3.txt', 'r')
-    except OSError as err:
-        print("Erro ao abrir o arquivo 'results3.txt':", err)
 
     # Extrai informações dos arquivos
     data_extract(f0, x0, y0)
     data_extract(f1, x1, y1)
     data_extract(f2, x2, y2)
-    data_extract(f3, x3, y3)
 
-    # Plota os gráficos de cada método
+    # Plota os gráficos de cada método individualmente
     plot_graph(x0, y0, 0)
     plot_graph(x1, y1, 1)
     plot_graph(x2, y2, 2)
-    plot_graph(x3, y3, 3)
 
-    # Exibe os gráficos
-    plt.show()
+    # Plota todos os gráficos na mesma janela
+    plot_all_graphs()
 
 
 def data_extract(f, x, y):
@@ -530,22 +361,51 @@ def data_extract(f, x, y):
 
 
 def plot_graph(x, y, id):
-    methods = {0:'FTBS', 1:'Lax-Friedrichs', 2:'Lax-Wendroff', 3:'Beam-Warming'}
-    colors  = {0: 'red', 1: 'green',         2: 'blue',        3: 'yellow'}
+    methods = {0: 'Upwind', 1:'Superbee', 2:'Van Albada'}
+    colors  = {0: 'red',    1: 'green',   2: 'blue'}
     fig,ax  = plt.subplots()
-    fig.set_size_inches(8, 7)
+    fig.set_size_inches(12, 7)
     ax.grid(True)
+    ax.set(ylim=(0, 2.2))
 
     plt.suptitle(f"Método {methods[id]}: Concentração X Posição")
-    plt.title(rf"$nx = {parameters['NX']}$, "
-              rf"$\Delta t = {parameters['DELTA_T']}$, "
-              rf"$\Delta x = {parameters['DELTA_X']}$, "
-              rf"$t_{{final}} = {parameters['T_FINAL']}$, "
-              rf"$\bar{{u}} = {parameters['U_BAR']}$, ", fontsize=8)
+    plt.title(rf"$nx = {parameters['nx']}$, "
+              rf"$\Delta t = {parameters['Delta_t']}$, "
+              rf"$\Delta x = {parameters['Delta_x']}$, "
+              rf"$t_{{final}} = {parameters['t_final']}$, "
+              rf"$\bar{{u}} = {parameters['u_bar']}$, ", fontsize=8)
 
     plt.xlabel("posição x (m)")
     plt.ylabel("concentração Q")
     plt.plot(x,y,'ko-', markerfacecolor=colors[id], markeredgecolor='k')
+    plt.draw()
+
+def plot_all_graphs():
+    methods = {0: 'Upwind', 1:'Superbee', 2:'Van Albada'}
+    colors  = {0: 'red',    1: 'green',   2: 'blue'}
+    fig,ax  = plt.subplots()
+    fig.set_size_inches(12, 7)
+    ax.grid(True)
+    ax.set(ylim=(0, 2.2))
+
+    plt.suptitle(f"Todos os métodos: Concentração X Posição")
+    plt.title(rf"$nx = {parameters['nx']}$, "
+              rf"$\Delta t = {parameters['Delta_t']}$, "
+              rf"$\Delta x = {parameters['Delta_x']}$, "
+              rf"$t_{{final}} = {parameters['t_final']}$, "
+              rf"$\bar{{u}} = {parameters['u_bar']}$, ", fontsize=8)
+    plt.xlabel("posição x (m)")
+    plt.ylabel("concentração Q")
+
+    plt.plot(x0, y0, f'{colors[0][0]}-', markerfacecolor=colors[0],
+             label=methods[0])
+    plt.plot(x1, y1, f'{colors[1][0]}-', markerfacecolor=colors[1],
+             label=methods[1])
+    plt.plot(x2, y2, f'{colors[2][0]}-', markerfacecolor=colors[2],
+             label=methods[2])
+    plt.legend(loc='upper right')
+    plt.savefig(f"./results/fig/methods_t={parameters['t_final']}.png")
+    plt.show()
 
 if __name__ == "__main__":
     main()

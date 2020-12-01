@@ -3,12 +3,12 @@ Neste capítulo serão descritos os resultados obtidos através da simulação d
 EDP com a variação de diversos parâmetros. Os parâmetros iniciais escolhidos
 para este trabalho foram:
 \begin{itemize}
-    \item $L_x = 10$m (comprimento do domínio)
-    \item $nx = 200$ (número de células)
-    \item $\bar{u} = 2$m/s (velocidade de escoamento)
-    \item $t_\text{final} = 1$s  (tempo final de simulação)
+    \item $L_x = 20$m (comprimento do domínio)
+    \item $nx = 400$ (número de células)
+    \item $\bar{u} = 1$m/s (velocidade de escoamento)
+    \item $t_\text{final} = 2$s  (tempo final de simulação)
     \item $\Delta x = \frac{L_x}{nx} = 0,05$m (passo no espaço)
-    \item $\Delta t = 0,9\left( \frac{\Delta_x}{\bar{u}} \right) = 0,0225$s
+    \item $\Delta t = 0,8\left( \frac{\Delta_x}{\bar{u}} \right) = 0,04$s
           (passo de tempo)
     \item $A = 100$
     \item $B = 1,5$
@@ -17,201 +17,59 @@ para este trabalho foram:
     \item $E = 2,0$
 \end{itemize}
 
-\section{Forward Time-Backward Space (FTBS)}
-
-\subsection{Resultados para variações de $nx$}
+\section{Resultados para variações de $nx$}
 Com a variação de $nx$, obtiveram-se os seguintes resultados:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{FTBSnx100}
-    \caption{FTBS: $nx = 100$}
+    \includegraphics[width=0.7\textwidth]{methods_nx=200}
+    \caption{FTBS, Superbee, Van Albada: $nx = 200$}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{FTBSnx200}
-    \caption{FTBS: $nx = 200$}
+    \includegraphics[width=0.7\textwidth]{methods_nx=400}
+    \caption{FTBS, Superbee, Van Albada: $nx = 400$}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{FTBSnx400}
-    \caption{FTBS: $nx = 400$}
+    \includegraphics[width=0.7\textwidth]{methods_nx=800}
+    \caption{FTBS, Superbee, Van Albada: $nx = 800$}
 \end{figure}
-Nota-se que o refinamento da malha resulta em uma curva mais suave, devido ao
-aumento da resolução. Este aumento no número de nós torna a solução discreta
-mais próxima da contínua (solução real).
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{methods_nx=1600}
+    \caption{FTBS, Superbee, Van Albada: $nx = 1600$}
+\end{figure}
+Nota-se que o refinamento da malha resulta em dois fenômenos: a primeira onda
+se torna mais ``pontiaguda'' e a segunda mais ``quadrada''; tais
+características não podiam ser representadas em uma malha de baixa resolução.
+Sendo assim, determina-se que o aumento no número de nós torna a solução
+discreta mais próxima da analítica (solução real).
 
-\subsection{Resultados para variações de $t_{\text{final}}$}
+\section{Resultados para variações de $t_{\text{final}}$}
 Com a variação de $t_{\text{final}}$, obtiveram-se os seguintes resultados:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{FTBSt_final0,333}
-    \caption{FTBS: $t_{\text{final}} = \frac{1}{3}$s}
+    \includegraphics[width=0.7\textwidth]{methods_t=1.000000}
+    \caption{FTBS, Superbee, Van Albada: $t_{\text{final}} = 1$s}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{FTBSt_final1,0}
-    \caption{FTBS: $t_{\text{final}} = 1,0$s}
+    \includegraphics[width=0.7\textwidth]{methods_t=2.000000}
+    \caption{FTBS, Superbee, Van Albada: $t_{\text{final}} = 2$s}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{FTBSt_final3,0}
-    \caption{FTBS: $t_{\text{final}} = 3,0$s}
+    \includegraphics[width=0.7\textwidth]{methods_t=4.000000}
+    \caption{FTBS, Superbee, Van Albada: $t_{\text{final}} = 4$s}
 \end{figure}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{FTBSt_final6,0}
-    \caption{FTBS: $t_{\text{final}} = 6,0$s}
+    \includegraphics[width=0.7\textwidth]{methods_t=8.000000}
+    \caption{FTBS, Superbee, Van Albada: $t_{\text{final}} = 8$s}
 \end{figure}
-Nota-se com o avanço do tempo, a onda, representada no gráfico, tende a se
-deslocar para a direita, devido ao valor de $\bar{u}$ positivo. Para um tempo
-grande o suficiente, a concentração se estabiliza em zero.
+Nota-se que com o avanço no tempo, dentre todos os métodos, o Superbee é o
+que menos apresentou difusão numérica, mantendo-se assim mais próximo da
+solução analítica (real). Comparado com os métodos de alta resolução,
+os métodos TVD apresentam as oscilações espúrias, o que os torna mais eficazes
+para este tipo de problema.
 
-\section{Lax-Friedrichs (L-F)}
-
-\subsection{Resultados para variações de $nx$}
-Com a variação de $nx$, obtiveram-se os seguintes resultados:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LFnx100}
-    \caption{L-F: $nx = 100$}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LFnx200}
-    \caption{L-F: $nx = 200$}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LFnx400}
-    \caption{L-F: $nx = 400$}
-\end{figure}
-Nota-se que o refinamento da malha resulta em uma curva mais suave, devido ao
-aumento da resolução. Este aumento no número de nós torna a solução discreta
-mais próxima da contínua (solução real).
-
-\subsection{Resultados para variações de $t_{\text{final}}$}
-Com a variação de $t_{\text{final}}$, obtiveram-se os seguintes resultados:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LFt_final0,333}
-    \caption{L-F: $t_{\text{final}} = \frac{1}{3}$s}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LFt_final1,0}
-    \caption{L-F: $t_{\text{final}} = 1,0$s}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LFt_final3,0}
-    \caption{L-F: $t_{\text{final}} = 3,0$s}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LFt_final6,0}
-    \caption{L-F: $t_{\text{final}} = 6,0$s}
-\end{figure}
-Nota-se com o avanço do tempo, a onda, representada no gráfico, tende a se
-deslocar para a direita, devido ao valor de $\bar{u}$ positivo. Para um tempo
-grande o suficiente, a concentração se estabiliza em zero.
-
-\section{Lax-Wendroff (L-W)}
-
-\subsection{Resultados para variações de $nx$}
-Com a variação de $nx$, obtiveram-se os seguintes resultados:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LWnx100}
-    \caption{L-W: $nx = 100$}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LWnx200}
-    \caption{L-W: $nx = 200$}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LWnx400}
-    \caption{L-W: $nx = 400$}
-\end{figure}
-Nota-se, com o refinamento da malha, a presença das oscilações numéricas
-características do método.
-
-Nota-se que o refinamento da malha resulta em uma curva mais suave, devido ao
-aumento da resolução, além disso, nota-se a presença de oscilações numéricas
-características do método.
-
-\subsection{Resultados para variações de $t_{\text{final}}$}
-Com a variação de $t_{\text{final}}$, obtiveram-se os seguintes resultados:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LWt_final0,333}
-    \caption{L-W: $t_{\text{final}} = \frac{1}{3}$s}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LWt_final1,0}
-    \caption{L-W: $t_{\text{final}} = 1,0$s}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LWt_final3,0}
-    \caption{L-W: $t_{\text{final}} = 3,0$s}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{LWt_final6,0}
-    \caption{L-W: $t_{\text{final}} = 6,0$s}
-\end{figure}
-Nota-se com o avanço do tempo, a onda, representada no gráfico, tende a se
-deslocar para a direita, devido ao valor de $\bar{u}$ positivo. Para um tempo
-grande o suficiente, a concentração se estabiliza em zero.
-
-\section{Beam-Warming (B-W)}
-
-\subsection{Resultados para variações de $nx$}
-Com a variação de $nx$, obtiveram-se os seguintes resultados:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{BWnx100}
-    \caption{B-W: $nx = 100$}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{BWnx200}
-    \caption{B-W: $nx = 200$}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{BWnx400}
-    \caption{B-W: $nx = 400$}
-\end{figure}
-Nota-se que o refinamento da malha resulta em uma curva mais suave, devido ao
-aumento da resolução, além disso, nota-se a presença de oscilações numéricas
-características do método.
-
-\subsection{Resultados para variações de $t_{\text{final}}$}
-Com a variação de $t_{\text{final}}$, obtiveram-se os seguintes resultados:
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{BWt_final0,333}
-    \caption{B-W: $t_{\text{final}} = \frac{1}{3}$s}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{BWt_final1,0}
-    \caption{B-W: $t_{\text{final}} = 1,0$s}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{BWt_final3,0}
-    \caption{B-W: $t_{\text{final}} = 3,0$s}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{BWt_final6,0}
-    \caption{B-W: $t_{\text{final}} = 6,0$s}
-\end{figure}
-Nota-se com o avanço do tempo, a onda, representada no gráfico, tende a se
-deslocar para a direita, devido ao valor de $\bar{u}$ positivo. Para um tempo
-grande o suficiente, a concentração se estabiliza em zero.

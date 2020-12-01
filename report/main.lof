@@ -3,34 +3,14 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces FTBS: $nx = 100$\relax }}{13}{}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces FTBS: $nx = 200$\relax }}{13}{}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces FTBS: $nx = 400$\relax }}{14}{}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces FTBS: $t_{\text {final}} = \frac {1}{3}$s\relax }}{14}{}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces FTBS: $t_{\text {final}} = 1,0$s\relax }}{15}{}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces FTBS: $t_{\text {final}} = 3,0$s\relax }}{15}{}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces FTBS: $t_{\text {final}} = 6,0$s\relax }}{16}{}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces L-F: $nx = 100$\relax }}{17}{}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces L-F: $nx = 200$\relax }}{17}{}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces L-F: $nx = 400$\relax }}{18}{}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces L-F: $t_{\text {final}} = \frac {1}{3}$s\relax }}{18}{}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces L-F: $t_{\text {final}} = 1,0$s\relax }}{19}{}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces L-F: $t_{\text {final}} = 3,0$s\relax }}{19}{}%
-\contentsline {figure}{\numberline {4.14}{\ignorespaces L-F: $t_{\text {final}} = 6,0$s\relax }}{20}{}%
-\contentsline {figure}{\numberline {4.15}{\ignorespaces L-W: $nx = 100$\relax }}{21}{}%
-\contentsline {figure}{\numberline {4.16}{\ignorespaces L-W: $nx = 200$\relax }}{21}{}%
-\contentsline {figure}{\numberline {4.17}{\ignorespaces L-W: $nx = 400$\relax }}{22}{}%
-\contentsline {figure}{\numberline {4.18}{\ignorespaces L-W: $t_{\text {final}} = \frac {1}{3}$s\relax }}{22}{}%
-\contentsline {figure}{\numberline {4.19}{\ignorespaces L-W: $t_{\text {final}} = 1,0$s\relax }}{23}{}%
-\contentsline {figure}{\numberline {4.20}{\ignorespaces L-W: $t_{\text {final}} = 3,0$s\relax }}{23}{}%
-\contentsline {figure}{\numberline {4.21}{\ignorespaces L-W: $t_{\text {final}} = 6,0$s\relax }}{24}{}%
-\contentsline {figure}{\numberline {4.22}{\ignorespaces B-W: $nx = 100$\relax }}{25}{}%
-\contentsline {figure}{\numberline {4.23}{\ignorespaces B-W: $nx = 200$\relax }}{25}{}%
-\contentsline {figure}{\numberline {4.24}{\ignorespaces B-W: $nx = 400$\relax }}{26}{}%
-\contentsline {figure}{\numberline {4.25}{\ignorespaces B-W: $t_{\text {final}} = \frac {1}{3}$s\relax }}{26}{}%
-\contentsline {figure}{\numberline {4.26}{\ignorespaces B-W: $t_{\text {final}} = 1,0$s\relax }}{27}{}%
-\contentsline {figure}{\numberline {4.27}{\ignorespaces B-W: $t_{\text {final}} = 3,0$s\relax }}{27}{}%
-\contentsline {figure}{\numberline {4.28}{\ignorespaces B-W: $t_{\text {final}} = 6,0$s\relax }}{28}{}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces FTBS, Superbee, Van Albada: $nx = 200$\relax }}{11}{}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces FTBS, Superbee, Van Albada: $nx = 400$\relax }}{12}{}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces FTBS, Superbee, Van Albada: $nx = 800$\relax }}{12}{}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces FTBS, Superbee, Van Albada: $nx = 1600$\relax }}{12}{}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces FTBS, Superbee, Van Albada: $t_{\text {final}} = 1$s\relax }}{13}{}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces FTBS, Superbee, Van Albada: $t_{\text {final}} = 2$s\relax }}{13}{}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces FTBS, Superbee, Van Albada: $t_{\text {final}} = 4$s\relax }}{14}{}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces FTBS, Superbee, Van Albada: $t_{\text {final}} = 8$s\relax }}{14}{}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }

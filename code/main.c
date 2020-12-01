@@ -63,7 +63,7 @@ void initializeArray(double arr[], int len, double a, double b, double c,
      *
      *                    Condição de contorno
      *                c(x,0) = exp(-A(x-B)²) + s(x)
-     * 
+     *
      *           onde s(x) = { E,    se  C <= x <= D
      *                       { 0,    c.c.
      */
@@ -78,7 +78,7 @@ void initializeArray(double arr[], int len, double a, double b, double c,
     }
 }
 
-double thetaPlusHalf(double arr[], int i) 
+double thetaPlusHalf(double arr[], int i)
 {
     int a, b, c;
 
@@ -90,16 +90,15 @@ double thetaPlusHalf(double arr[], int i)
     /* Workaround para divisão por zero */
     if (arr[c] - arr[b] == 0) {
         return (arr[b] - arr[a]) / 1e-10;
-        /* return 0; */
     }
 
     return (arr[b] - arr[a]) / (arr[c] - arr[b]);
 }
 
-double thetaMinusHalf(double arr[], int i) 
+double thetaMinusHalf(double arr[], int i)
 {
     int a, b, c;
-    
+
     /* Aplica condição de contorno / volume fantasma */
     a = (i - 2) < 0 ? 0 : (i - 2);
     b = (i - 1) < 0 ? 0 : (i - 1);
@@ -108,7 +107,6 @@ double thetaMinusHalf(double arr[], int i)
     /* Workaround para divisão por zero */
     if (arr[c] - arr[b] == 0) {
         return (arr[b] - arr[a]) / 1e-10;
-        /* return 0; */
     }
 
     return (arr[b] - arr[a]) / (arr[c] - arr[b]);
@@ -121,59 +119,46 @@ void calculateQ( double old[], double new[], double (*psi)(double theta) )
     double t = 0;
 
     do {
-        /* 
-         *                     Fronteira esquerda 
+        /*
+         *                     Fronteira esquerda
          *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
-         *                  ^ 
+         *                  ^
          */
         i = 0;
         new[i] = old[i] - COURANT/2 * (1-COURANT) * (
                      psi(thetaPlusHalf(old, i)) * (old[i+1] - old[i])
                  );
 
-        /* 
-         *                  Após a fronteira esquerda 
-         *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
-         *                      ^ 
-         */
-        i = 1;
-        new[i] = old[i] - COURANT * (
-                        old[i] - old[i-1]
-                    ) - COURANT/2 * (1-COURANT) * (
-                          psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  ) 
-                        - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
-                    );
-
-        /* 
+        /*
          *                            Centro
          *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
-         *                          ^   ^   ^   ^
+         *                      ^   ^   ^   ^   ^
          */
-        for (i = 2; i < NX - 1; ++i) {
+        for (i = 1; i < NX - 1; ++i) {
             new[i] = old[i] - COURANT * (
                          old[i] - old[i-1]
                      ) - COURANT/2 * (1-COURANT) * (
-                           psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  ) 
+                           psi(thetaPlusHalf(old, i))  * (old[i+1] - old[i]  )
                          - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
                      );
         }
 
-        /* 
+        /*
          *                      Fronteira direita
          *                |=@=|=@=|=@=|=@=|=@=|=@=|=@=|
-         *                                          ^ 
+         *                                          ^
          */
         new[i] = old[i] - COURANT * (
                      old[i] - old[i-1]
                  ) - COURANT/2 * (1-COURANT) * (
-                     - psi(thetaMinusHalf(old, i)) * (old[i]   - old[i-1])
+                     - psi(thetaMinusHalf(old, i)) * (old[i] - old[i-1])
                  );
 
-       /* Atualiza array de valores antigos com os novos para o próximo
-          passo de tempo */
+        /* Atualiza array de valores antigos com os novos para o próximo
+           passo de tempo */
         for (i = 0; i < NX; ++i) {
             old[i] = new[i];
-        }      
+        }
 
     } while ( (t += DELTA_T) <= T_FINAL);
 }
@@ -229,7 +214,7 @@ void printAndSaveResults(double arr[], int len, int method)
     sprintf(file1, "%s%s", "./../results/", filename);
     if (   ( results_file = fopen(file0, "w") ) == NULL
         && ( results_file = fopen(file1, "w") ) == NULL ) {
-        fprintf(stderr, 
+        fprintf(stderr,
                 "[ERR] Houve um erro ao escrever o arquivo \"%s\"! "
                 "Os resultados nao foram salvos.\n", filename);
         exit(1);

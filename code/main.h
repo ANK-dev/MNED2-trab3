@@ -9,7 +9,7 @@
 #define NX      (400)               /* nx: número de células                  */
 #define DELTA_X (LX/NX)             /* Δx: largura de cada célula (em m)      */
 #define U_BAR   (1.0)               /* ū: velocidade de escoamento (em m/s)   */
-#define T_FINAL (14.0)               /* tempo final da simulação (em segundos) */
+#define T_FINAL (2.0)               /* tempo final da simulação (em segundos) */
 #define COURANT (0.8)               /* C: número de courant                   */
 
 #define DELTA_T (COURANT*DELTA_X/U_BAR) /* Δt: passo de tempo (em segundos)   */

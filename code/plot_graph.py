@@ -1,5 +1,5 @@
 ################################################################################
-#         Métodos Numéricos para Equações Diferenciais II -- Trabalho 2        #
+#         Métodos Numéricos para Equações Diferenciais II -- Trabalho 3        #
 #                           Ariel Nogueira Kovaljski                           #
 ################################################################################
 
@@ -37,10 +37,10 @@ def main():
     data_extract(f1, x1, y1)
     data_extract(f2, x2, y2)
 
-    # Plota os gráficos de cada método
-    # plot_graph(x0, y0, 0)
-    # plot_graph(x1, y1, 1)
-    # plot_graph(x2, y2, 2)
+    # Plota os gráficos de cada método individualmente
+    plot_graph(x0, y0, 0)
+    plot_graph(x1, y1, 1)
+    plot_graph(x2, y2, 2)
 
     # Plota todos os gráficos na mesma janela
     plot_all_graphs()
@@ -97,9 +97,12 @@ def plot_all_graphs():
     plt.xlabel("posição x (m)")
     plt.ylabel("concentração Q")
 
-    plt.plot(x0, y0, f'{colors[0][0]}-', markerfacecolor=colors[0], label=methods[0])
-    plt.plot(x1, y1, f'{colors[1][0]}-', markerfacecolor=colors[1], label=methods[1])
-    plt.plot(x2, y2, f'{colors[2][0]}-', markerfacecolor=colors[2], label=methods[2])
+    plt.plot(x0, y0, f'{colors[0][0]}-', markerfacecolor=colors[0],
+             label=methods[0])
+    plt.plot(x1, y1, f'{colors[1][0]}-', markerfacecolor=colors[1],
+             label=methods[1])
+    plt.plot(x2, y2, f'{colors[2][0]}-', markerfacecolor=colors[2],
+             label=methods[2])
     plt.legend(loc='upper right')
     plt.savefig(f"./results/fig/methods_t={parameters['t_final']}.png")
     plt.show()

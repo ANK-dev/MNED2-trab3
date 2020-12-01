@@ -54,7 +54,7 @@ de controle em função de $Q^n$, isto é,
     F_{i+1/2}^n = \mathcal{F}(Q_i^n, Q_{i+1}^n)
 \]
 Reescrevendo a Eq.\ \ref{lei de cons.} em função de $\mathcal{F}$ obtém-se,
-\begin{equation}
+\begin{equation}\label{vol. fin.}
     Q_i^{n+1} = Q_i^n - \frac{\Delta t}{\Delta x}\bigg[
         \mathcal{F}(Q_i^n,Q_{i+1}^n) - \mathcal{F}(Q_{i-1}^n,Q_i^n)
     \bigg]
@@ -62,7 +62,6 @@ Reescrevendo a Eq.\ \ref{lei de cons.} em função de $\mathcal{F}$ obtém-se,
 de forma que o valor futuro $Q_i^{n+1}$ depende explicitamente dos valores
 anteriores $Q^n$ na vizinhança do volume $i$ e das funções $\mathcal{F}$.
 
-Neste trabalho, serão utilizados quatro métodos numéricos baseados no método
+Neste trabalho, serão utilizados três métodos numéricos baseados no método
 dos volumes finitos --- Forward Time-Backward Space (FTBS),\linebreak
-Lax-Friedrichs, Lax-Wendroff e Beam-Warming --- visando resolver a equação da
-advecção.
+Superbee, Van Albada --- visando resolver a equação da advecção.

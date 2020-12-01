@@ -2,22 +2,24 @@
 
 Observa-se que a aplicação de diferentes métodos numéricos para um mesmo
 problema --- neste caso, a EDP da advecção --- resulta em soluções bastante
-diferentes. Métodos de primeira ordem como FTBS e Lax-Friedrichs, possuem erro
+diferentes. Métodos de primeira ordem como FTBS, possuem erro
 de truncamento na ordem de $\frac{\partial^2 c}{\partial x^2}$ o que introduz
-uma pequena difusão numérica e oscilações. Métodos de segunda ordem como
-Lax-Wendroff e Beam-Warming apesar de tecnicamente melhores, apresentam erro de
-truncamento na ordem de $\frac{\partial^3 c}{\partial x^3}$ o que resulta em
-dispersão numérica e maiores oscilações.
+um grau mais elevado de difusão numérica. Métodos TVD, possuem as vantagens dos
+Métodos de Alta Resolução --- baixa difusão numérica, devido ao erro de
+truncamento na ordem de $\frac{\partial^3 c}{\partial x^3}$ --- sem os seus
+defeitos --- oscilações espúrias.
 
 Em relação aos refinamentos da malha, nota-se que todos os métodos se comportam
-de maneira similar. Uma diminuição no número de nós $nx$ resulta em uma curva
-mais ``pontiaguda'' e um aumento deste resulta em uma curva mais ``suave''.
-Como consequência, pode-se concluir que o refinamento da malha aproxima os
-gráficos --- pertencentes ao domínio discreto --- da solução contínua, dada
-pela EDP analítica.
+de maneira similar. Uma diminuição no número de nós $nx$, prejudica a acurácia
+da solução, pois a baixa resolução esconde as variações abruptas nas curvas. O
+aumento de $nx$ apresenta um resultado mais fiel ao real, porém demanda mais
+poder computacional para o cálculo da malha.
 
-Em relação às mudanças em $t_{\text{final}}$, observa-se que novamente os
-métodos apresentam comportamento similar. Conforme o avanço do tempo, o efeito
-advectivo faz com que as concentrações se desloquem para a direita, o que está
-de acordo com a velocidade $\bar{u} > 0$. Dado um tempo suficientemente longo,
-as concentrações se estabilizam em zero.
+Em relação às mudanças em $t_{\text{final}}$, observa-se que conforme o avanço
+do tempo, o efeito advectivo faz com que as concentrações se desloquem para a
+direita, o que está de acordo com a velocidade $\bar{u} > 0$. Erros causados
+pela difusão numérica mostram que métodos de primeira ordem como o FTBS não são
+os mais adequados para esta análise. Dentre os métodos TVD, o que apresentou
+melhor resultado foi o Superbee, pois manteve-se mais próximo da curva
+analítica comparado com o Van Albada, mesmo para valores de $t_{\text{final}}$
+elevados.
